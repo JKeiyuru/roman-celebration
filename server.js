@@ -2,94 +2,91 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 require('dotenv').config();
 
 const app = express();
 
-// Email transporter configuration
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD
-  }
-});
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Function to send notification email
 const sendNotificationEmail = async (rsvpData) => {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.FAMILY_EMAIL,
-    subject: `🎉 New RSVP: ${rsvpData.name} - Roman's Celebration`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #d97706, #ea580c, #dc2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-          .detail { margin: 15px 0; padding: 15px; background: white; border-left: 4px solid #d97706; border-radius: 5px; }
-          .label { font-weight: bold; color: #d97706; margin-bottom: 5px; }
-          .value { color: #333; font-size: 16px; }
-          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
-          .crown { font-size: 40px; margin-bottom: 10px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <div class="crown">👑</div>
-            <h1 style="margin: 0;">New RSVP Received!</h1>
-            <p style="margin: 10px 0 0 0;">Someone just confirmed their attendance for Roman's celebration</p>
-          </div>
-          <div class="content">
-            <div class="detail">
-              <div class="label">Guest Name:</div>
-              <div class="value">${rsvpData.name}</div>
-            </div>
-            
-            <div class="detail">
-              <div class="label">Number of Guests:</div>
-              <div class="value">${rsvpData.guests} ${rsvpData.guests === 1 ? 'Guest' : 'Guests'}</div>
-            </div>
-            
-            ${rsvpData.message ? `
-            <div class="detail">
-              <div class="label">Message:</div>
-              <div class="value">${rsvpData.message}</div>
-            </div>
-            ` : ''}
-            
-            <div class="detail">
-              <div class="label">Submitted On:</div>
-              <div class="value">${new Date(rsvpData.createdAt).toLocaleString('en-KE', { 
-                dateStyle: 'full', 
-                timeStyle: 'short',
-                timeZone: 'Africa/Nairobi'
-              })}</div>
-            </div>
-            
-            <div class="footer">
-              <p>🎊 Harambee! Let us all pull together 🎊</p>
-              <p style="font-size: 12px; color: #999;">This is an automated notification from Roman's Celebration RSVP System</p>
-            </div>
-          </div>
-        </div>
-      </body>
-      </html>
-    `
-  };
-
   try {
-    const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Notification email sent successfully:', result.messageId);
-    return { success: true, messageId: result.messageId };
+    const { data, error } = await resend.emails.send({
+      from: 'Roman Celebration <notifications@resend.dev>',
+      to: [process.env.FAMILY_EMAIL],
+      subject: `🎉 New RSVP: ${rsvpData.name} - Roman's Celebration`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #d97706, #ea580c, #dc2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+            .detail { margin: 15px 0; padding: 15px; background: white; border-left: 4px solid #d97706; border-radius: 5px; }
+            .label { font-weight: bold; color: #d97706; margin-bottom: 5px; }
+            .value { color: #333; font-size: 16px; }
+            .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+            .crown { font-size: 40px; margin-bottom: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="crown">👑</div>
+              <h1 style="margin: 0;">New RSVP Received!</h1>
+              <p style="margin: 10px 0 0 0;">Someone just confirmed their attendance for Roman's celebration</p>
+            </div>
+            <div class="content">
+              <div class="detail">
+                <div class="label">Guest Name:</div>
+                <div class="value">${rsvpData.name}</div>
+              </div>
+              
+              <div class="detail">
+                <div class="label">Number of Guests:</div>
+                <div class="value">${rsvpData.guests} ${rsvpData.guests === 1 ? 'Guest' : 'Guests'}</div>
+              </div>
+              
+              ${rsvpData.message ? `
+              <div class="detail">
+                <div class="label">Message:</div>
+                <div class="value">${rsvpData.message}</div>
+              </div>
+              ` : ''}
+              
+              <div class="detail">
+                <div class="label">Submitted On:</div>
+                <div class="value">${new Date(rsvpData.createdAt).toLocaleString('en-KE', { 
+                  dateStyle: 'full', 
+                  timeStyle: 'short',
+                  timeZone: 'Africa/Nairobi'
+                })}</div>
+              </div>
+              
+              <div class="footer">
+                <p>🎊 Harambee! Let us all pull together 🎊</p>
+                <p style="font-size: 12px; color: #999;">This is an automated notification from Roman's Celebration RSVP System</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+
+    if (error) {
+      console.error('❌ Error sending notification email:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('✅ Notification email sent successfully:', data.id);
+    return { success: true, messageId: data.id };
   } catch (error) {
     console.error('❌ Error sending notification email:', error);
-    // Don't throw error - we don't want to fail the RSVP if email fails
     return { success: false, error: error.message };
   }
 };
@@ -153,7 +150,7 @@ app.post('/api/rsvp', async (req, res) => {
 
     await rsvp.save();
 
-    // Send notification email AFTER saving RSVP - WITH AWAIT
+    // Send notification email AFTER saving RSVP
     console.log('📧 Attempting to send notification email for:', rsvp.name);
     const emailResult = await sendNotificationEmail(rsvp);
     console.log('📧 Email send result:', emailResult);
