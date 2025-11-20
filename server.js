@@ -84,11 +84,13 @@ const sendNotificationEmail = async (rsvpData) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Notification email sent successfully');
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Notification email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Error sending notification email:', error);
+    console.error('❌ Error sending notification email:', error);
     // Don't throw error - we don't want to fail the RSVP if email fails
+    return { success: false, error: error.message };
   }
 };
 
@@ -151,13 +153,15 @@ app.post('/api/rsvp', async (req, res) => {
 
     await rsvp.save();
 
-// Send notification email AFTER saving RSVP
-sendNotificationEmail(rsvp);
+    // Send notification email AFTER saving RSVP - WITH AWAIT
+    console.log('📧 Attempting to send notification email for:', rsvp.name);
+    const emailResult = await sendNotificationEmail(rsvp);
+    console.log('📧 Email send result:', emailResult);
 
-res.status(201).json({ 
-  message: 'RSVP confirmed successfully!',
-  rsvp 
-});
+    res.status(201).json({ 
+      message: 'RSVP confirmed successfully!',
+      rsvp 
+    });
 
   } catch (error) {
     console.error('Error creating RSVP:', error);
