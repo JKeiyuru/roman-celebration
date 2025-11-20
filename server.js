@@ -151,10 +151,14 @@ app.post('/api/rsvp', async (req, res) => {
 
     await rsvp.save();
 
-    res.status(201).json({ 
-      message: 'RSVP confirmed successfully!',
-      rsvp 
-    });
+// Send notification email AFTER saving RSVP
+sendNotificationEmail(rsvp);
+
+res.status(201).json({ 
+  message: 'RSVP confirmed successfully!',
+  rsvp 
+});
+
   } catch (error) {
     console.error('Error creating RSVP:', error);
     res.status(500).json({ 
