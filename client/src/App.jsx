@@ -1,5 +1,9 @@
+// client/src/App.jsx - Frontend Application with API URL Configuration
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Clock, Send, CheckCircle, Users, Sparkles, Star, Crown } from 'lucide-react';
+
+// API URL configuration - use environment variable or fallback to localhost
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const RomanCelebration = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +23,7 @@ const RomanCelebration = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/rsvp/stats');
+      const response = await fetch(`${API_URL}/api/rsvp/stats`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -39,7 +43,7 @@ const RomanCelebration = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/rsvp', {
+      const response = await fetch(`${API_URL}/api/rsvp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -384,7 +388,7 @@ With courage and grace, a boy steps toward the man he is becoming. And as our fa
               <Star className="w-4 h-4 text-amber-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
             </div>
             <p className="text-gray-600 italic text-lg">
-              “Let this gathering mark the rising of a new man.”
+              "Let this gathering mark the rising of a new man."
             </p>
             <p className="text-sm text-gray-500">
               With love, The Kinyua Family
