@@ -38,82 +38,106 @@ const sendNotificationEmail = async (rsvpData) => {
       return { success: false, error: 'No recipient emails configured' };
     }
 
-    // Send to all emails in a single API call (Resend supports multiple recipients)
-    const { data, error } = await resend.emails.send({
-      from: 'Roman Celebration <notifications@resend.dev>',
-      to: familyEmails,
-      subject: `🎉 New RSVP: ${rsvpData.name} - Roman's Celebration`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #d97706, #ea580c, #dc2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-            .detail { margin: 15px 0; padding: 15px; background: white; border-left: 4px solid #d97706; border-radius: 5px; }
-            .label { font-weight: bold; color: #d97706; margin-bottom: 5px; }
-            .value { color: #333; font-size: 16px; }
-            .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
-            .crown { font-size: 40px; margin-bottom: 10px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <div class="crown">👑</div>
-              <h1 style="margin: 0;">New RSVP Received!</h1>
-              <p style="margin: 10px 0 0 0;">Someone just confirmed their attendance for Roman's celebration</p>
-            </div>
-            <div class="content">
-              <div class="detail">
-                <div class="label">Guest Name:</div>
-                <div class="value">${rsvpData.name}</div>
+    // Send individual emails to each recipient
+    const emailResults = [];
+    
+    for (const email of familyEmails) {
+      try {
+        console.log(`📧 Sending email to: ${email}`);
+        
+        const { data, error } = await resend.emails.send({
+          from: 'Roman Celebration <notifications@resend.dev>',
+          to: [email],
+          subject: `🎉 New RSVP: ${rsvpData.name} - Roman's Celebration`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #d97706, #ea580c, #dc2626); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+                .detail { margin: 15px 0; padding: 15px; background: white; border-left: 4px solid #d97706; border-radius: 5px; }
+                .label { font-weight: bold; color: #d97706; margin-bottom: 5px; }
+                .value { color: #333; font-size: 16px; }
+                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+                .crown { font-size: 40px; margin-bottom: 10px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <div class="crown">👑</div>
+                  <h1 style="margin: 0;">New RSVP Received!</h1>
+                  <p style="margin: 10px 0 0 0;">Someone just confirmed their attendance for Roman's celebration</p>
+                </div>
+                <div class="content">
+                  <div class="detail">
+                    <div class="label">Guest Name:</div>
+                    <div class="value">${rsvpData.name}</div>
+                  </div>
+                  
+                  <div class="detail">
+                    <div class="label">Number of Guests:</div>
+                    <div class="value">${rsvpData.guests} ${rsvpData.guests === 1 ? 'Guest' : 'Guests'}</div>
+                  </div>
+                  
+                  ${rsvpData.message ? `
+                  <div class="detail">
+                    <div class="label">Message:</div>
+                    <div class="value">${rsvpData.message}</div>
+                  </div>
+                  ` : ''}
+                  
+                  <div class="detail">
+                    <div class="label">Submitted On:</div>
+                    <div class="value">${new Date(rsvpData.createdAt).toLocaleString('en-KE', { 
+                      dateStyle: 'full', 
+                      timeStyle: 'short',
+                      timeZone: 'Africa/Nairobi'
+                    })}</div>
+                  </div>
+                  
+                  <div class="footer">
+                    <p>🎊 Harambee! Let us all pull together 🎊</p>
+                    <p style="font-size: 12px; color: #999;">This is an automated notification from Roman's Celebration RSVP System</p>
+                  </div>
+                </div>
               </div>
-              
-              <div class="detail">
-                <div class="label">Number of Guests:</div>
-                <div class="value">${rsvpData.guests} ${rsvpData.guests === 1 ? 'Guest' : 'Guests'}</div>
-              </div>
-              
-              ${rsvpData.message ? `
-              <div class="detail">
-                <div class="label">Message:</div>
-                <div class="value">${rsvpData.message}</div>
-              </div>
-              ` : ''}
-              
-              <div class="detail">
-                <div class="label">Submitted On:</div>
-                <div class="value">${new Date(rsvpData.createdAt).toLocaleString('en-KE', { 
-                  dateStyle: 'full', 
-                  timeStyle: 'short',
-                  timeZone: 'Africa/Nairobi'
-                })}</div>
-              </div>
-              
-              <div class="footer">
-                <p>🎊 Harambee! Let us all pull together 🎊</p>
-                <p style="font-size: 12px; color: #999;">This is an automated notification from Roman's Celebration RSVP System</p>
-              </div>
-            </div>
-          </div>
-        </body>
-        </html>
-      `
-    });
+            </body>
+            </html>
+          `
+        });
 
-    if (error) {
-      console.error('❌ Error sending notification email:', error);
-      return { success: false, error: error.message };
+        if (error) {
+          console.error(`❌ Error sending email to ${email}:`, error);
+          emailResults.push({ email, success: false, error: error.message });
+        } else {
+          console.log(`✅ Email sent successfully to ${email}, ID:`, data.id);
+          emailResults.push({ email, success: true, messageId: data.id });
+        }
+      } catch (error) {
+        console.error(`❌ Error sending email to ${email}:`, error);
+        emailResults.push({ email, success: false, error: error.message });
+      }
+      
+      // Small delay between emails to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    console.log('✅ Notification email sent successfully to all recipients');
-    console.log('📧 Email ID:', data.id);
-    return { success: true, messageId: data.id, recipients: familyEmails.length };
+    const successfulSends = emailResults.filter(result => result.success).length;
+    console.log(`📧 Email sending summary: ${successfulSends}/${familyEmails.length} successful`);
+
+    return { 
+      success: successfulSends > 0, 
+      results: emailResults,
+      totalRecipients: familyEmails.length,
+      successfulSends: successfulSends
+    };
+
   } catch (error) {
-    console.error('❌ Error sending notification email:', error);
+    console.error('❌ Error in sendNotificationEmail function:', error);
     return { success: false, error: error.message };
   }
 };
@@ -194,6 +218,33 @@ app.get('/api/debug/emails', (req, res) => {
   });
 });
 
+// Test email endpoint
+app.post('/api/test-email', async (req, res) => {
+  try {
+    console.log('🧪 Testing email sending to all recipients...');
+    
+    const testRsvpData = {
+      name: 'Test User',
+      guests: 2,
+      message: 'This is a test RSVP to verify email delivery',
+      createdAt: new Date()
+    };
+
+    const emailResult = await sendNotificationEmail(testRsvpData);
+    
+    res.json({
+      message: 'Test email sent',
+      result: emailResult
+    });
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    res.status(500).json({ 
+      message: 'Error sending test email',
+      error: error.message 
+    });
+  }
+});
+
 // Routes
 
 // Create RSVP
@@ -223,7 +274,8 @@ app.post('/api/rsvp', async (req, res) => {
 
     res.status(201).json({ 
       message: 'RSVP confirmed successfully!',
-      rsvp 
+      rsvp,
+      emailResult: emailResult.success ? `Emails sent to ${emailResult.successfulSends}/${emailResult.totalRecipients} recipients` : 'Email notification failed'
     });
 
   } catch (error) {
