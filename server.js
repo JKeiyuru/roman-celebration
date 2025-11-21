@@ -13,9 +13,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Function to send notification email
 const sendNotificationEmail = async (rsvpData) => {
   try {
+    // Parse FAMILY_EMAIL - handle multiple emails separated by commas
+    const familyEmails = process.env.FAMILY_EMAIL
+      ? process.env.FAMILY_EMAIL.split(',').map(email => email.trim()).filter(email => email)
+      : [];
+
+    if (familyEmails.length === 0) {
+      console.error('❌ No valid family emails configured');
+      return { success: false, error: 'No recipient emails configured' };
+    }
+
+    console.log('📧 Sending to emails:', familyEmails);
+
     const { data, error } = await resend.emails.send({
       from: 'Roman Celebration <notifications@resend.dev>',
-      to: [process.env.FAMILY_EMAIL],
+      to: familyEmails,
       subject: `🎉 New RSVP: ${rsvpData.name} - Roman's Celebration`,
       html: `
         <!DOCTYPE html>
