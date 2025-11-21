@@ -159,7 +159,7 @@ const RomanCelebration = () => {
           <div className="text-center space-y-6 mb-16">
             <div className="relative inline-block">
               <h1 className="text-6xl sm:text-7xl font-serif text-gray-900 tracking-tight relative z-10">
-                Roman Kinyua
+                Roman Karani Kinyua
               </h1>
               <div className="absolute inset-0 animate-shimmer" />
             </div>
@@ -176,7 +176,7 @@ const RomanCelebration = () => {
               A Celebration of Heritage
             </p>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              You are cordially invited to join the Kinyua family as we celebrate Roman's successful passage through a sacred rite of our ancestors - a moment of pride, tradition, and new beginnings.
+              You are cordially invited to join the family of Alice and Hosea Kinyua as we celebrate our son's -Roman Karani's- successful rite of passage to manhood - a moment of pride, tradition, and new beginnings.
             </p>
           </div>
 
