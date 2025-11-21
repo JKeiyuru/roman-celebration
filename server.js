@@ -13,18 +13,32 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Function to send notification email
 const sendNotificationEmail = async (rsvpData) => {
   try {
-    // Parse FAMILY_EMAIL - handle multiple emails separated by commas
-    const familyEmails = process.env.FAMILY_EMAIL
-      ? process.env.FAMILY_EMAIL.split(',').map(email => email.trim()).filter(email => email)
-      : [];
+    // Parse FAMILY_EMAIL - handle multiple emails with better parsing
+    let familyEmails = [];
+    
+    if (process.env.FAMILY_EMAIL) {
+      familyEmails = process.env.FAMILY_EMAIL
+        .split(',')
+        .map(email => email.trim())
+        .filter(email => {
+          // Basic email validation
+          const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+          if (!isValid) {
+            console.warn(`⚠️ Invalid email format skipped: ${email}`);
+          }
+          return isValid;
+        });
+    }
+
+    console.log('📧 Parsed emails:', familyEmails);
+    console.log('📧 Total emails to send to:', familyEmails.length);
 
     if (familyEmails.length === 0) {
       console.error('❌ No valid family emails configured');
       return { success: false, error: 'No recipient emails configured' };
     }
 
-    console.log('📧 Sending to emails:', familyEmails);
-
+    // Send to all emails in a single API call (Resend supports multiple recipients)
     const { data, error } = await resend.emails.send({
       from: 'Roman Celebration <notifications@resend.dev>',
       to: familyEmails,
@@ -95,8 +109,9 @@ const sendNotificationEmail = async (rsvpData) => {
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Notification email sent successfully:', data.id);
-    return { success: true, messageId: data.id };
+    console.log('✅ Notification email sent successfully to all recipients');
+    console.log('📧 Email ID:', data.id);
+    return { success: true, messageId: data.id, recipients: familyEmails.length };
   } catch (error) {
     console.error('❌ Error sending notification email:', error);
     return { success: false, error: error.message };
@@ -163,6 +178,20 @@ const RSVP = mongoose.model('RSVP', rsvpSchema);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Backend API is running' });
+});
+
+// Debug endpoint to check email configuration
+app.get('/api/debug/emails', (req, res) => {
+  const familyEmails = process.env.FAMILY_EMAIL
+    ? process.env.FAMILY_EMAIL.split(',').map(email => email.trim()).filter(email => email)
+    : [];
+
+  res.json({
+    FAMILY_EMAIL: process.env.FAMILY_EMAIL,
+    parsedEmails: familyEmails,
+    count: familyEmails.length,
+    emails: familyEmails
+  });
 });
 
 // Routes
