@@ -175,9 +175,10 @@ const RomanCelebration = () => {
             <p className="text-2xl sm:text-3xl text-amber-800 font-light tracking-wide">
               A Celebration of Heritage
             </p>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              You are cordially invited to join the family of Alice and Hosea Kinyua as we celebrate our son's -Roman Karani's- successful rite of passage to manhood - a moment of pride, tradition, and new beginnings.
-            </p>
+<p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+  <span className="font-bold">13th December 2025:</span> You are cordially invited to join the family of Hosea and Alice Kinyua as we celebrate our son's – Roman Karani’s – successful rite of passage to manhood — a moment of pride, tradition, and new beginnings.
+</p>
+
           </div>
 
           {/* Decorative Quote with Animated Border */}
