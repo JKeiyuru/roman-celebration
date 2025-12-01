@@ -283,7 +283,7 @@ With courage and grace, a boy steps toward the man he is becoming. And as our fa
               <div className="bg-gradient-to-r from-amber-600 via-orange-500 to-red-600 p-8 text-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                 <Crown className="w-12 h-12 text-white mx-auto mb-3 relative z-10" />
-                <h2 className="text-3xl font-serif text-white mb-2 relative z-10">Confirm Your Presence</h2>
+                <h2 className="text-3xl font-serif text-white mb-2 relative z-10">Confirm Your Attendace</h2>
                 <p className="text-amber-50 relative z-10">Please let us know if you'll be joining us</p>
               </div>
 
